@@ -1,11 +1,11 @@
-import type { Metadata, Viewport } from 'next'
-import { Inter, Space_Mono } from 'next/font/google'
+import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import ClientProviders from '@/components/client-providers'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' })
+// Polices système pour éviter les erreurs de téléchargement Google Fonts
+const inter = { variable: '--font-inter' }
+const spaceMono = { variable: '--font-space-mono' }
 
 export const metadata: Metadata = {
   title: 'SmartRH Mauritanie',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const viewport: Viewport = {
+export const viewport = {
   themeColor: '#0d9488',
 }
 
