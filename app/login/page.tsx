@@ -1,90 +1,119 @@
 "use client"
 
 import { useState } from "react"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Lock, Mail, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const { login, availableUsers } = useAuth()
-  const router = useRouter()
-  const [selectedEmail, setSelectedEmail] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedEmail) {
-      setError("Veuillez selectionner un utilisateur")
-      return
-    }
-    const success = login(selectedEmail)
-    if (success) {
-      router.push("/dashboard")
-    } else {
-      setError("Identifiants incorrects")
-    }
-  }
+    setLoading(true)
+    setError("")
 
-  const roleColors: Record<string, string> = {
-    HR: "bg-teal-100 text-teal-800 border-teal-200",
-    Manager: "bg-amber-100 text-amber-800 border-amber-200",
-    Employee: "bg-sky-100 text-sky-800 border-sky-200",
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Identifiants invalides. Veuillez réessayer.")
+      } else {
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      setError("Une erreur est survenue lors de la connexion.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary-foreground">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <Card className="w-full max-w-md shadow-lg border-teal-100">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="rounded-full bg-teal-600 p-3 shadow-teal-200 shadow-lg">
+              <Lock className="h-6 w-6 text-white" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-balance">SmartRH Mauritanie</CardTitle>
-          <CardDescription className="text-pretty">
-            Connectez-vous pour acceder au systeme de gestion RH
+          <CardTitle className="text-2xl font-bold text-teal-900 font-mono">SmartRH</CardTitle>
+          <CardDescription>
+            Connectez-vous à votre portail RH sécurisé
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="user-select">Utilisateur</Label>
-              <Select value={selectedEmail} onValueChange={(v) => { setSelectedEmail(v); setError("") }}>
-                <SelectTrigger id="user-select">
-                  <SelectValue placeholder="Selectionner un utilisateur" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map((u) => (
-                    <SelectItem key={u.email} value={u.email}>
-                      <span className="flex items-center gap-2">
-                        {u.name}
-                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${roleColors[u.role] || ""}`}>
-                          {u.role}
-                        </Badge>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800 py-2">
+                <AlertDescription className="text-sm">{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email professionnel</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="nom@entreprise.com"
+                  className="pl-10 border-slate-200 focus:ring-teal-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input id="password" type="password" placeholder="Mot de passe (demo)" defaultValue="demo" />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Mot de passe</Label>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 border-slate-200 focus:ring-teal-500"
+                  required
+                />
+              </div>
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
-              Se connecter
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button 
+              type="submit" 
+              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-6"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connexion en cours...
+                </>
+              ) : (
+                "Se connecter"
+              )}
             </Button>
-          </form>
-        </CardContent>
+            <p className="text-xs text-center text-slate-500">
+              © 2026 SmartRH Mauritanie. Tous droits réservés.
+            </p>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   )
