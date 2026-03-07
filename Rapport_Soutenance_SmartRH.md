@@ -252,28 +252,21 @@ classDiagram
 
 # 6. Réalisation Technique
 
-## 6.1 Technologies utilisées
+### 6.2. Identité Visuelle et Design System
 
-### Frontend
-- **React 18 & Next.js 13+ :** Framework robuste pour le SSR et le routage.
-- **Tailwind CSS 4 :** Pour un design Premium et responsive.
-- **Shadcn UI & Radix UI :** Bibliothèque de composants accessibles et design.
+Pour SmartRH, nous avons développé une identité visuelle "Premium" qui s'éloigne des interfaces RH classiques (souvent austères). 
 
-### Backend
-- **Next.js API Routes :** Pour les endpoints serveurs.
-- **Prisma ORM :** Pour une interaction typée et sécurisée avec la base de données.
-- **Node.js :** Environnement d'exécution.
+**Choix Graphiques :**
+*   **Palette de Couleurs :** Utilisation d'un dégradé de **Teal** (Bleu-Vert) profond (`#0d9488`) associé à des tons de **Slate** (Ardoise) pour un rendu moderne et apaisant.
+*   **Mode Sombre et Verre (Glassmorphism) :** L'interface utilise des effets de flou d'arrière-plan (`backdrop-filter`) et des transparences pour donner de la profondeur.
+*   **Typographie :** Emploi de polices système monospécifiées (Space Mono) pour un aspect technique et précis, renforçant l'image de "solution intelligente".
 
-### Base de données
-- **PostgreSQL / MySQL :** Stockage relationnel fiable.
+**Infrastructure CSS :**
+*   **Tailwind CSS 4 :** Framework utilitaire permettant une personnalisation totale sans fichiers CSS lourds.
+*   **Système de Design (Shadcn UI) :** Base de composants atomiques (Boutons, Cards, Modals) harmonisés, garantissant une cohérence visuelle parfaite sur toutes les pages.
+*   **Responsive Design :** Utilisation de grilles flexibles (Flexbox et CSS Grid) pour assurer une accessibilité sur ordinateurs, tablettes et smartphones.
 
-### Authentification & Sécurité
-- **NextAuth / JWT :** Protection des routes et gestion des identités.
-- **Bcrypt :** Hachage des mots de passe.
-
----
-
-## 6.2 Fonctionnalités principales
+## 6.3. Fonctionnalités principales
 
 ### Gestion des employés
 Outil complet permettant d'ajouter, modifier, consulter (fiches détaillées) et archiver les informations des collaborateurs.
