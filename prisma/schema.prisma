@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  Employee
+  Manager
+  HR
+}
+
+enum CongeType {
+  Annuel
+  Maladie
+  Maternite
+  Exceptionnel
+}
+
+enum CongeStatut {
+  En_attente
+  Approuve
+  Refuse
+}
+
+enum FormationStatut {
+  Planifiee
+  En_cours
+  Terminee
+}
+
+model Grade {
+  id_grade    Int        @id @default(autoincrement())
+  grade_name  String
+  description String?
+  salary_base Float
+  bonus       Float      @default(0)
+  employees   Employee[]
+}
+
+model Employee {
+  id_emp          Int            @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  date_birth      DateTime
+  date_hire       DateTime       @default(now())
+  grade_id        Int
+  grade           Grade          @relation(fields: [grade_id], references: [id_grade])
+  manager_id      Int?
+  manager         Employee?      @relation("ManagerSubordinates", fields: [manager_id], references: [id_emp])
+  subordinates    Employee[]     @relation("ManagerSubordinates")
+  salary_base     Float
+  status          String         @default("Active")
+  phone           String?
+  address         String?
+  user            User?
+  bulletins       BulletinPaie[]
+  conges          Conge[]
+  formations      Formation[]    @relation("EmployeeFormations")
+  validatedConges Conge[]        @relation("ValideurConges")
+}
+
+model User {
+  id_user       Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  role          Role     @default(Employee)
+  emp_id        Int      @unique
+  employee      Employee @relation(fields: [emp_id], references: [id_emp])
+}
+
+model BulletinPaie {
+  id_bulletin     Int      @id @default(autoincrement())
+  emp_id          Int
+  employee        Employee @relation(fields: [emp_id], references: [id_emp])
+  mois            Int
+  annee           Int
+  salaire_brut    Float
+  cotisations     Float
+  primes          Float
+  net_a_payer     Float
+  date_generation DateTime @default(now())
+}
+
+model Conge {
+  id_conge      Int         @id @default(autoincrement())
+  emp_id        Int
+  employee      Employee    @relation(fields: [emp_id], references: [id_emp])
+  type          CongeType
+  date_debut    DateTime
+  date_fin      DateTime
+  statut        CongeStatut @default(En_attente)
+  valideur_id   Int?
+  valideur      Employee?   @relation("ValideurConges", fields: [valideur_id], references: [id_emp])
+  solde_restant Int
+}
+
+model Formation {
+  id_formation Int             @id @default(autoincrement())
+  nom          String
+  date_debut   DateTime
+  date_fin     DateTime
+  statut       FormationStatut @default(Planifiee)
+  cout         Float
+  participants Employee[]      @relation("EmployeeFormations")
+}
