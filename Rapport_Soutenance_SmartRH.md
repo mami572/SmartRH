@@ -146,25 +146,107 @@ Les principales étapes du projet ont suivi le cycle classique du génie logicie
 
 ---
 
-# 5. Conception du Système
+## 5. Conception du Système
 
-## 5.1 Architecture logicielle
+### 5.1 Architecture logicielle
 
 L’application suit une architecture **Full Stack moderne** tirant parti des dernières avancées du JavaScript.
 
 **Architecture générale :**
 Utilisateur (Browser) ↔ Interface Web (React / Next.js) ↔ API Backend (Next.js Server Actions/Routes) ↔ ORM Prisma ↔ Base de données PostgreSQL/MySQL
 
-## 5.2 Diagramme des modules
+### 5.2 Modélisation Fonctionnelle (Diagramme de Cas d'Utilisation)
 
-Les principaux modules de SmartRH sont interconnectés :
+Le diagramme suivant illustre les interactions possibles entre les différents types d'utilisateurs et les fonctionnalités de SmartRH.
 
-- **Module Authentification & Sécurité :** Gestion des sessions et accès par rôles.
-- **Module Gestion du Personnel :** Création et suivi des fiches employés.
-- **Module Structure Salariale :** Gestion des grades, salaires de base et primes.
-- **Module Congés :** Circuit de demande, validation et calcul du solde restant.
-- **Module Paie :** Génération des bulletins mensuels.
-- **Module Formations :** Catalogue et suivi des participations.
+```mermaid
+useCaseDiagram
+    actor "Employé" as E
+    actor "Manager" as M
+    actor "Gestionnaire RH" as RH
+
+    package "SmartRH System" {
+        usecase "S'authentifier" as UC1
+        usecase "Consulter son Profil" as UC2
+        usecase "Demander un Congé" as UC3
+        usecase "Consulter le Catalogue Formation" as UC4
+        usecase "Valider les Congés (Équipe)" as UC5
+        usecase "Gérer les Employés" as UC6
+        usecase "Calculer la Paie" as UC7
+        usecase "Gérer les Formations" as UC8
+    }
+
+    E --> UC1
+    E --> UC2
+    E --> UC3
+    E --> UC4
+
+    M --|> E
+    M --> UC5
+
+    RH --|> M
+    RH --> UC6
+    RH --> UC7
+    RH --> UC8
+
+    UC3 ..> UC1 : <<include>>
+    UC5 ..> UC1 : <<include>>
+    UC6 ..> UC1 : <<include>>
+```
+
+### 5.3 Modélisation des Données (Diagramme de Classes)
+
+Le diagramme de classes suivant représente la structure relationnelle de la base de données SmartRH.
+
+```mermaid
+classDiagram
+    class Employee {
+        +Int id_emp
+        +String first_name
+        +String last_name
+        +DateTime date_hire
+        +Float salary_base
+        +String status
+    }
+    class User {
+        +Int id_user
+        +String email
+        +String password_hash
+        +Role role
+    }
+    class Grade {
+        +Int id_grade
+        +String grade_name
+        +Float salary_base
+        +Float bonus
+    }
+    class Conge {
+        +Int id_conge
+        +DateTime date_debut
+        +DateTime date_fin
+        +CongeStatut statut
+    }
+    class BulletinPaie {
+        +Int id_bulletin
+        +Int mois
+        +Int annee
+        +Float net_a_payer
+    }
+    class Formation {
+        +Int id_formation
+        +String nom
+        +DateTime date_debut
+        +FormationStatut statut
+        +Float cout
+    }
+
+    Employee "1" -- "1" User : Possède
+    Grade "1" -- "0..*" Employee : Définit
+    Employee "1" -- "0..*" Conge : Demande
+    Employee "1" -- "0..*" BulletinPaie : Reçoit
+    Employee "0..*" -- "0..*" Formation : Participe
+    Employee "1" -- "0..*" Employee : Encadre (Manager)
+```
 
 ---
 
